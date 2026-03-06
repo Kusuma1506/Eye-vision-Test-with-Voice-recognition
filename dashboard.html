@@ -1,0 +1,23 @@
+<h2>Vision Test Dashboard</h2>
+
+<a href="/test">Start Eye Test</a>
+<br><br>
+
+<button onclick="loadHistory()">View History</button>
+
+<pre id="history"></pre>
+
+<script>
+
+function loadHistory(){
+
+fetch("/history")
+.then(res=>res.json())
+.then(data=>{
+document.getElementById("history").innerText =
+JSON.stringify(data,null,2)
+})
+
+}
+
+</script>

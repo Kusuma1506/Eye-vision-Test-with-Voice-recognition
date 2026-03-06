@@ -1,0 +1,547 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        let colorBlindIndex = 0;
+        const colorTests = [
+{
+image: "/static/images/cbt1.jpg",
+answer: "12"
+},
+{
+image: "/static/images/cbt2.jpg",
+answer: "6"
+},
+{
+image: "/static/images/cbt3.jpg",
+answer: "2015"
+},
+{
+image: "/static/images/cbt4.jpg",
+answer: "9"
+}
+];
+        </script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Eye Vision Test</title>
+   <style>
+    body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            
+            background-size: cover;
+            color: #333;
+          
+        }
+        #home{
+            background: url("C:\Users\KUSUMA\Eye sight Test\static\images\eye image 1.jpeg") ;
+            background-size: cover;
+           
+            background-position: center;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+        }
+        .section {
+            display: none;
+            min-height: 100vh;
+            padding: 20px;
+            text-align: center;
+           
+            border-radius: 15px;
+            margin: 20px auto;
+            max-width: 1200px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+           
+        }
+        .section.active {
+            display: block;
+        }
+        .form-container, .test-selection {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        form {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        input, select, button {
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input:focus, select:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+        .test-selection {
+            flex-direction: row;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .test-card {
+            background: linear-gradient(135deg, #ffffff, #f0f0f0);
+            padding: 20px;
+            border-radius: 10px;
+            width: 40%;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .test-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        }
+        .test-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(76, 175, 80, 0.1), transparent 70%);
+            z-index: 0;
+            transition: transform 0.5s;
+        }
+        .test-card:hover::before {
+            transform: rotate(45deg);
+        }
+        .test-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+            position: relative;
+            z-index: 1;
+        }
+        .test-card h3 {
+            margin: 10px 0;
+            color: #2e7d32;
+            font-size: 1.5em;
+            position: relative;
+            z-index: 1;
+        }
+        .test-card p {
+            color: #555;
+            position: relative;
+            z-index: 1;
+        }
+        .input-options {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .mic-button {
+            background: #ff4444;
+            padding: 10px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .mic-button:hover {
+            background: #cc0000;
+        }
+        #snellenTest .test-content, #colorBlindnessTest .test-content {
+            background-color:#555(255, 255, 255, 0.8);
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+         
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        #snellenForm{
+            background-image: url("C:\Users\KUSUMA\Eye sight Test\static\images\st.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+        }
+        #snellenLetter {
+            font-size: 3em;
+            line-height: 1.2;
+            margin: 20px 0;
+            color: #333;
+        }
+        #colorBlindnessForm{
+            background-image: url("C:\Users\KUSUMA\Eye sight Test\static\images\cbt.jpeg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+        }
+        #colorBlindnessTest img {
+            max-width: 400px;
+            margin: 20px auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        #results {
+            background: url("C:\Users\KUSUMA\Eye sight Test\static\images\eye image 2.jpeg") no-repeat center center;
+            background-size: cover;
+            color:black;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        }
+        #results .results-box {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+   </style>
+</head>
+<body>
+    <div id="home" class="section active">
+        <h1>Eye Vision Test</h1>
+        <div class="form-container">
+            <p>Please enter your details to start the test.</p>
+            <form id="userForm">
+                <input type="text" id="name" placeholder="Name" required>
+                <input type="number" id="age" placeholder="Age" required>
+                <select id="gender" required>
+                    <option value="" disabled selected>Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+                <button type="submit">Submit Details</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="testSelection" class="section">
+        <h2>Select a Test</h2>
+        <div class="test-selection">
+            <div class="test-card" onclick="startTest('snellen')">
+                <img src="C:\Users\KUSUMA\Eye sight Test\static\images\st.jpg" alt="Snellen Chart">
+                <h3>Snellen Test</h3>
+                <p>Test your visual acuity with letters.</p>
+            </div>
+            <div class="test-card" onclick="startTest('colorBlindness')">
+               <img id="colorImage" src="/static/images/cbt1.jpg" style="max-width:400px;">
+                <h3>Color Blindness Test</h3>
+                <p>Check for color vision deficiencies.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="snellenTest" class="section">
+        <h2>Snellen Test</h2>
+        <div class="test-content">
+            <img src="C:\Users\KUSUMA\Eye sight Test\static\images\st.jpg" alt="Snellen Chart" style="max-width: 400px;">
+            <p id="snellenLetter">
+                <span style="font-size: 2.5em;">E</span>
+                <span style="font-size: 1.5em;">F T</span>
+                   <span style="font-size: 1.5em;">K G</span>
+                
+                <span style="font-size: 1em;">L P D</span>
+            </p>
+            <form id="snellenForm">
+                <input type="text" id="snellenInput" placeholder="Enter the letters you see" required>
+                <div class="input-options">
+                    <button type="button" onclick="toggleSnellenInput('write')">Write</button>
+                    <div class="mic-button" id="snellenMic" onclick="startSnellenSpeech()">🎤</div>
+                </div>
+                <button type="submit">Submit</button>
+                <button type="button" onclick="nextSnellen()">Next</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="colorBlindnessTest" class="section">
+        <h2>Color Blindness Test</h2>
+        <div class="test-content">
+            <img src="C:\Users\KUSUMA\Eye sight Test\static\images\cbt.jpeg" alt="Color Blindness Pattern" style="max-width: 400px;">
+            <p>Enter the number you see in the pattern:</p>
+            <form id="colorBlindnessForm">
+                <input type="text" id="colorBlindInput" placeholder="Enter the number" required>
+                <div class="input-options">
+                    <button type="button" onclick="toggleColorBlindInput('write')">Write</button>
+                    <div class="mic-button" id="colorBlindMic" onclick="startColorBlindSpeech()">🎤</div>
+                </div>
+                <button type="submit">Submit</button>
+                <button type="button" onclick="nextColorBlind()">Next</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="results" class="section">
+        <h2>Test Results</h2>
+        <div class="results-box" id="resultContent"></div>
+        <button onclick="showSection('home')">Back to Home</button>
+    </div>
+
+    <script>
+        let userDetails = {};
+        let snellenCorrect = 0;
+        let colorBlindCorrect = 0;
+        let snellenTotal = 0;
+        let colorBlindTotal = 0;
+        const snellenSequences = [
+            ['E', 'F', 'T', 'L', 'P'],
+            ['D', 'F', 'P', 'E', 'T'],
+            ['L', 'P', 'D', 'F', 'E'],
+            ['K', 'Y', 'P', 'B', 'M']
+        ];
+       
+        let snellenIndex = 0;
+        
+         let colorResults = [];
+        let recognition = null;
+        let isListening = false;
+       
+        const colorNumbers = [
+            { number: '12', bg: '#00ff00', fg: '#ff0000' },
+            { number: '8', bg: '#ff0000', fg: '#00ff00' },
+            { number: '5', bg: '#00ff00', fg: '#ff0000' }
+    ];
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+        }
+
+        document.getElementById('userForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            userDetails.name = document.getElementById('name').value;
+            userDetails.age = document.getElementById('age').value;
+            userDetails.gender = document.getElementById('gender').value;
+            if (userDetails.name && userDetails.age && userDetails.gender) {
+                showSection('testSelection');
+            } else {
+                alert('Please fill in all details.');
+            }
+        });
+
+        function startTest(testType) {
+            if (testType === 'snellen') {
+                showSection('snellenTest');
+            } else if (testType === 'colorBlindness') {
+                showSection('colorBlindnessTest');
+            }
+        }
+
+        function initSpeechRecognition() {
+            if ('webkitSpeechRecognition' in window) {
+                recognition = new webkitSpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+            } else {
+                alert('Speech recognition not supported in this browser.');
+            }
+        }
+
+        function startSnellenSpeech() {
+            if (recognition) {
+                recognition.onresult = (event) => {
+                    const letters = event.results[0][0].transcript.toUpperCase().split(' ').slice(0, 5).join(' ');
+                    document.getElementById('snellenInput').value = letters;
+                    recognition.stop();
+                };
+                recognition.start();
+            }
+        }
+
+        function startColorBlindSpeech() {
+            if (recognition) {
+                recognition.onresult = (event) => {
+                    const number = event.results[0][0].transcript;
+                    document.getElementById('colorBlindInput').value = number;
+                    recognition.stop();
+                };
+                recognition.start();
+            }
+        }
+
+        function toggleSnellenInput(method) {
+            document.getElementById('snellenInput').focus();
+        }
+
+        function toggleColorBlindInput(method) {
+            document.getElementById('colorBlindInput').focus();
+        }
+
+        document.getElementById('snellenForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const input = document.getElementById('snellenInput').value.toUpperCase().split(' ').slice(0, 5).join(' ');
+            const expected = snellenSequences[snellenIndex % snellenSequences.length].join(' ');
+            if (input === expected) {
+                snellenCorrect++;
+            }
+            snellenTotal++;
+            nextSnellen();
+        });
+
+        document.getElementById('colorBlindnessForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const input = document.getElementById('colorBlindInput').value;
+
+    if (input === colorTests[colorBlindIndex].answer) {
+        colorBlindCorrect++;
+    }
+
+    colorBlindTotal++;
+    nextColorBlind();
+});
+
+        function nextSnellen() {
+            snellenIndex++;
+            if (snellenIndex < snellenSequences.length) {
+                const sequence = snellenSequences[snellenIndex % snellenSequences.length];
+                document.getElementById('snellenLetter').innerHTML = `
+                    <span style="font-size: 2.5em;">${sequence[0]}</span>
+                    <span style="font-size: 1.5em;">${sequence[1]} ${sequence[2]}</span>
+                    <span style="font-size: 1em;">${sequence[3]} ${sequence[4]}</span>
+                `;
+                document.getElementById('snellenInput').value = '';
+            } else {
+                showResults();
+            }
+        }
+
+       function nextColorBlind() {
+
+colorBlindIndex++;
+
+if (colorBlindIndex < colorTests.length) {
+
+document.getElementById("colorImage").src =
+colorTests[colorBlindIndex].image;
+
+document.getElementById("colorBlindInput").value = "";
+
+}
+else {
+
+showResults();
+
+}
+
+}
+
+        function showResults() {
+            const snellenScore = (snellenTotal > 0) ? (snellenCorrect / snellenTotal) * 100 : 0;
+            const colorBlindScore = (colorBlindTotal > 0) ? (colorBlindCorrect / colorBlindTotal) * 100 : 0;
+            let snellenSuggestion = snellenScore >= 70 ? 
+                "Your visual acuity is good. Continue regular eye check-ups." :
+                "Consider consulting an eye specialist for further evaluation.";
+            let colorBlindSuggestion = colorBlindScore >= 70 ? 
+                "Your color vision appears normal. Regular testing is advised." :
+                "You may have a color vision deficiency. Consult a professional.";
+
+            document.getElementById('resultContent').innerHTML = `
+                <h3>User Details</h3>
+                <p>Name: ${userDetails.name}</p>
+                <p>Age: ${userDetails.age}</p>
+                <p>Gender: ${userDetails.gender}</p>
+                <h3>Snellen Test Results</h3>
+                <p>Correct: ${snellenCorrect}/${snellenTotal}</p>
+                <p>Score: ${snellenScore.toFixed(2)}%</p>
+                <p>Suggestion: ${snellenSuggestion}</p>
+                <h3>Color Blindness Test Results</h3>
+                <p>Correct: ${colorBlindCorrect}/${colorBlindTotal}</p>
+                <p>Score: ${colorBlindScore.toFixed(2)}%</p>
+                <p>Suggestion: ${colorBlindSuggestion}</p>
+            `;
+            showSection('results');
+            fetch("/save_result",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+snellen: snellenCorrect,
+color: colorBlindCorrect
+})
+})
+.then(res=>res.json())
+.then(data=>{
+console.log("Result saved",data);
+});
+            
+        }
+
+
+        window.onload = initSpeechRecognition;
+    </script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+static/images/cbt.jpeg 
+static/images/cbt1.jpg 
+static/images/cbt2.jpg 
+static/images/cbt3.jpg
+static/images/cbt4.jpg
+static/images/eye image 1.jpeg 
+static/images/eye image 2.jpeg 
+static/images/st.jpg
